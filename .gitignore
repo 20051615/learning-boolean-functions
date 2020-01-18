@@ -1,0 +1,11 @@
+# Everything that comes with Google's OR-tools
+bin/
+examples/
+include/
+lib/
+objs/
+packages/
+share/
+LICENSE-2.0.txt
+Makefile
+README.md
