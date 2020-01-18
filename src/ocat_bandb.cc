@@ -87,7 +87,7 @@ int propose_clause(const std::vector<std::vector<int> *> &pos, std::vector<std::
                        accepted_neg[atom + d].end(),
                        std::back_inserter(next_state)
                        );
-        if (next_state.size() >= best_known) continue;
+        if (next_state.size() > best_known) continue;
         int kicked = push_capped(*next_level, limit, next_state);
         if (kicked < smallest_kicked) smallest_kicked = kicked;
       }
@@ -153,8 +153,6 @@ std::vector<std::vector<int> > train(std::vector<std::vector<int> > &x, int y[])
     while (best_known != 0) {
       best_known = propose_clause(pos, neg, limit, best_known, clause);
       limit *= LIMIT_MULTIPLIER;
-
-      LOG(INFO) << "best_known " << best_known;
     }
 
     result.push_back(clause);
