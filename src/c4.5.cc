@@ -23,13 +23,11 @@ struct Node {
   // Deallocates the entire tree rooted at this node
   // DO NOT USE FOR OBJECTS THAT LIVE ON THE STACK (delete this)
   void self_destruct() {
-    if (!atom) {
-      delete this;
-    } else {
+    if (atom) {
       payload.child[0]->self_destruct();
       payload.child[1]->self_destruct();
-      delete this;
     }
+    delete this;
   }
 };
 
