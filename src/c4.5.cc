@@ -3,7 +3,7 @@
 
 struct Node {
   int atom; // 0 indicates a leaf node
-  union Payload {
+  union {
     Node *child[2];
     bool label;
   } payload;
@@ -19,15 +19,24 @@ struct Node {
     this->atom = atom;
   }
 
-  // Should only be used for dynamically allocated nodes
-  // Deallocates the entire tree rooted at this node
-  // DO NOT USE FOR OBJECTS THAT LIVE ON THE STACK (delete this)
-  void self_destruct() {
+  ~Node() {
     if (atom) {
-      payload.child[0]->self_destruct();
-      payload.child[1]->self_destruct();
+      delete payload.child[0];
+      delete payload.child[1];
     }
-    delete this;
+  }
+};
+
+struct Tree {
+  Node *root;
+
+  // Note: only pass in dynamically allocated nodes
+  Tree(Node *root) {
+    this->root = root;
+  }
+
+  ~Tree() {
+    delete root;
   }
 };
 
@@ -35,6 +44,6 @@ int main() {
   Node* root = new Node(1);
   root->payload.child[0] = new Node(true);
   root->payload.child[1] = new Node(false);
-  root->self_destruct();
+  Tree tree(root);
   return EXIT_SUCCESS;
 }
