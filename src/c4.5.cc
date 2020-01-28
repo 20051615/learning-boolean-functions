@@ -4,20 +4,15 @@
 struct Node {
   int atom; // 0 indicates a leaf node
   union {
-    Node *child[2];
     bool label;
+    Node *child[2];
   } payload;
 
   // Constructs a leaf
-  Node(bool label) {
-    atom = 0;
-    payload.label = label;
-  }
+  Node(bool label): atom(0), payload{label} {}
 
   // Constructs a non-leaf node
-  Node(int atom) {
-    this->atom = atom;
-  }
+  Node(int atom): atom(atom) {}
 
   ~Node() {
     if (atom) {
@@ -31,9 +26,7 @@ struct Tree {
   Node *root;
 
   // Note: only pass in dynamically allocated nodes
-  Tree(Node *root) {
-    this->root = root;
-  }
+  Tree(Node *root): root(root) {}
 
   ~Tree() {
     delete root;
