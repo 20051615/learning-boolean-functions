@@ -24,7 +24,6 @@ class Tree {
   };
   Node *root;
 
-  // Note: only pass in dynamically allocated nodes
   Tree(Node *root): root(root) {}
 
   public:
@@ -36,8 +35,7 @@ class Tree {
     Node* root = new Node(1);
     root->payload.child[0] = new Node(true);
     root->payload.child[1] = new Node(false);
-    Tree result(root);
-    return result;
+    return Tree(root);
   }
 };
 
