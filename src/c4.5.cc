@@ -13,7 +13,10 @@ class Tree {
     Node(bool label): atom(0), payload{label} {}
 
     // Constructs a non-leaf node
-    Node(int atom): atom(atom) {}
+    Node(int atom): atom(atom) {
+      payload.child[0] = nullptr;
+      payload.child[1] = nullptr;
+    }
 
     ~Node() {
       if (atom) {
@@ -21,25 +24,33 @@ class Tree {
         delete payload.child[1];
       }
     }
-  };
-  Node *root;
 
-  Tree(Node *root): root(root) {}
+    private:
+      Node(const Node&);
+      Node& operator=(const Node&);
+  };
+  Node *root = nullptr;
+  
+  Tree(const Tree&);
+  Tree& operator=(const Tree&);
 
   public:
-  ~Tree() {
-    delete root;
-  }
+    Tree() {};
 
-  static Tree test() {
-    Node* root = new Node(1);
-    root->payload.child[0] = new Node(true);
-    root->payload.child[1] = new Node(false);
-    return Tree(root);
-  }
+    ~Tree() {
+      delete root;
+    }
+
+    static void test(Tree &tree) {
+      Node* root = new Node(1);
+      root->payload.child[0] = new Node(true);
+      root->payload.child[1] = new Node(false);
+      tree.root = root;
+    }
 };
 
 int main() {
-  Tree tree = Tree::test();
+  Tree tree;
+  Tree::test(tree);
   return EXIT_SUCCESS;
 }
