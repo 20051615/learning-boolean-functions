@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_set>
 #include <limits>
+#include <string>
 
 double entropy(int a, int b) {
   double entropy = 0;
@@ -69,6 +70,25 @@ class Tree {
       if (atom) {
         delete payload.child[0];
         delete payload.child[1];
+      }
+    }
+
+    void getFormula(const bool &inCNF, std::vector<std::vector<int> > &formula_store, std::vector<int> &curBranch) {
+      if (atom == 0) {
+        if (inCNF && !payload.label) {
+          for (int i = 0; i < curBranch.size(); ++i) {
+            curBranch[i] = -curBranch[i];
+          }
+          formula_store.push_back(std::move(curBranch));
+        } else if (!inCNF && payload.label) {
+          formula_store.push_back(std::move(curBranch));
+        }
+      } else {
+        std::vector<int> negBranch = curBranch;
+        negBranch.push_back(-atom);
+        payload.child[0]->getFormula(inCNF, formula_store, negBranch);
+        curBranch.push_back(atom);
+        payload.child[1]->getFormula(inCNF, formula_store, curBranch);
       }
     }
 
@@ -150,6 +170,13 @@ class Tree {
       return cur->payload.label;
     }
 
+    std::vector<std::vector<int> > getFormula(const bool &inCNF) {
+      std::vector<std::vector<int> > formula;
+      std::vector<int> branch_store;
+      root->getFormula(inCNF, formula, branch_store);
+      return formula;
+    }
+
 };
 
 int main() {
@@ -174,6 +201,25 @@ int main() {
   int y[] = {-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1};
 
   Tree decision_tree(x, y);
+  std::vector<std::vector<int> > formula = decision_tree.getFormula(true);
+  std::string formula_str = "(";
+  for (int i = 0; i < formula.size(); ++i) {
+    for (int j = 0; j < formula[i].size(); ++j) {
+      formula_str += std::to_string(formula[i][j]) + (j != formula[i].size() - 1 ? " + " : "");
+    }
+    formula_str += (i != formula.size() - 1 ? ") * (" : ")");
+  }
+  LOG(INFO) << "ID3 CNF: " << formula_str;
+
+  formula = decision_tree.getFormula(false);
+  formula_str = "";
+  for (int i = 0; i < formula.size(); ++i) {
+    for (int j = 0; j < formula[i].size(); ++j) {
+      formula_str += std::to_string(formula[i][j]) + (j != formula[i].size() - 1 ? " * " : "");
+    }
+    formula_str += (i != formula.size() - 1 ? " + " : "");
+  }
+  LOG(INFO) << "ID3 DNF: " << formula_str;
 
   for (const std::vector<int> &sample : x) {
     LOG(INFO) << decision_tree.predict(sample);
