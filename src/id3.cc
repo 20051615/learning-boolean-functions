@@ -1,10 +1,13 @@
 // For ortools-style logging and such
 #include "ortools/linear_solver/linear_solver.h"
+
 #include <math.h>
 #include <vector>
 #include <unordered_set>
 #include <limits>
 #include <string>
+
+#include "id3.h"
 
 double entropy(int a, int b) {
   double entropy = 0;
@@ -48,183 +51,114 @@ int best_atom(
   }
   return best_atom;
 }
+    
+Tree::Node::Node(bool label): atom(0), payload{label} {}
 
-class Tree {
-  struct Node {
-    int atom; // 0 indicates a leaf node
-    union {
-      bool label;
-      Node *child[2];
-    } payload;
+Tree::Node::Node(int atom): atom(atom) {
+  payload.child[0] = nullptr;
+  payload.child[1] = nullptr;
+}
 
-    // Constructs a leaf
-    Node(bool label): atom(0), payload{label} {}
+Tree::Node::~Node() {
+  if (atom) {
+    delete payload.child[0];
+    delete payload.child[1];
+  }
+}
 
-    // Constructs a non-leaf node
-    Node(int atom): atom(atom) {
-      payload.child[0] = nullptr;
-      payload.child[1] = nullptr;
-    }
-
-    ~Node() {
-      if (atom) {
-        delete payload.child[0];
-        delete payload.child[1];
+void Tree::Node::getFormula(const bool &inCNF, std::vector<std::vector<int> > &formula_store, std::vector<int> &curBranch) {
+  if (atom == 0) {
+    if (inCNF && !payload.label) {
+      for (int i = 0; i < curBranch.size(); ++i) {
+        curBranch[i] = -curBranch[i];
       }
+      formula_store.push_back(std::move(curBranch));
+    } else if (!inCNF && payload.label) {
+      formula_store.push_back(std::move(curBranch));
     }
+  } else {
+    std::vector<int> negBranch = curBranch;
+    negBranch.push_back(-atom);
+    payload.child[0]->getFormula(inCNF, formula_store, negBranch);
+    curBranch.push_back(atom);
+    payload.child[1]->getFormula(inCNF, formula_store, curBranch);
+  }
+}
 
-    void getFormula(const bool &inCNF, std::vector<std::vector<int> > &formula_store, std::vector<int> &curBranch) {
-      if (atom == 0) {
-        if (inCNF && !payload.label) {
-          for (int i = 0; i < curBranch.size(); ++i) {
-            curBranch[i] = -curBranch[i];
-          }
-          formula_store.push_back(std::move(curBranch));
-        } else if (!inCNF && payload.label) {
-          formula_store.push_back(std::move(curBranch));
-        }
-      } else {
-        std::vector<int> negBranch = curBranch;
-        negBranch.push_back(-atom);
-        payload.child[0]->getFormula(inCNF, formula_store, negBranch);
-        curBranch.push_back(atom);
-        payload.child[1]->getFormula(inCNF, formula_store, curBranch);
-      }
-    }
+Tree::Node* Tree::ID3(const std::vector<std::vector<int> *> &pos, const std::vector<std::vector<int> *> &neg, std::unordered_set<int> available) {
+  if (neg.empty())
+    return new Node(true);
+  if (pos.empty())
+    return new Node(false);
+  if (available.empty())
+    return new Node(pos.size() > neg.size() ? true : false);
+  int atom = best_atom(pos, neg, available);
+  Node* result = new Node(atom);
+  available.erase(atom);
 
-    private:
-      Node(const Node&);
-      Node& operator=(const Node&);
-  };
-  Node *root = nullptr;
+  std::vector<std::vector<int> *> pos_0, pos_1, neg_0, neg_1;
+  int index = atom - 1;
+  for (int i = 0; i < pos.size(); ++i) {
+    if ((*(pos[i]))[index]) pos_1.push_back(pos[i]);
+    else pos_0.push_back(pos[i]);
+  }
+  for (int i = 0; i < neg.size(); ++i) {
+    if ((*(neg[i]))[index]) neg_1.push_back(neg[i]);
+    else neg_0.push_back(neg[i]);
+  }
 
-  Tree(const Tree&);
-  Tree& operator=(const Tree&);
+  if (pos_0.empty() && neg_0.empty()) {
+    result->payload.child[0] = new Node(pos.size() > neg.size() ? true : false);
+  } else {
+    result->payload.child[0] = ID3(pos_0, neg_0, available);
+  }
 
-  static Node* ID3(const std::vector<std::vector<int> *> &pos, const std::vector<std::vector<int> *> &neg, std::unordered_set<int> available) {
-    if (neg.empty())
-      return new Node(true);
-    if (pos.empty())
-      return new Node(false);
-    if (available.empty())
-      return new Node(pos.size() > neg.size() ? true : false);
-    int atom = best_atom(pos, neg, available);
-    Node* result = new Node(atom);
-    available.erase(atom);
+  if (pos_1.empty() && neg_1.empty()) {
+    result->payload.child[1] = new Node(pos.size() > neg.size() ? true : false);
+  } else {
+    result->payload.child[1] = ID3(pos_1, neg_1, available);
+  }
 
-    std::vector<std::vector<int> *> pos_0, pos_1, neg_0, neg_1;
-    int index = atom - 1;
-    for (int i = 0; i < pos.size(); ++i) {
-      if ((*(pos[i]))[index]) pos_1.push_back(pos[i]);
-      else pos_0.push_back(pos[i]);
-    }
-    for (int i = 0; i < neg.size(); ++i) {
-      if ((*(neg[i]))[index]) neg_1.push_back(neg[i]);
-      else neg_0.push_back(neg[i]);
-    }
+  return result;
+}
 
-    if (pos_0.empty() && neg_0.empty()) {
-      result->payload.child[0] = new Node(pos.size() > neg.size() ? true : false);
+Tree::Tree(std::vector<std::vector<int> > &x, int y[]) {
+  std::vector<std::vector<int> *> pos, neg;
+  for (int i = 0; i < x.size(); ++i) {
+    if (y[i] > 0) {
+      pos.push_back(&(x[i]));
     } else {
-      result->payload.child[0] = ID3(pos_0, neg_0, available);
+      neg.push_back(&(x[i]));
     }
-
-    if (pos_1.empty() && neg_1.empty()) {
-      result->payload.child[1] = new Node(pos.size() > neg.size() ? true : false);
-    } else {
-      result->payload.child[1] = ID3(pos_1, neg_1, available);
-    }
-
-    return result;
   }
 
-  public:
-    Tree(std::vector<std::vector<int> > &x, int y[]) {
-      std::vector<std::vector<int> *> pos, neg;
-      for (int i = 0; i < x.size(); ++i) {
-        if (y[i] > 0) {
-          pos.push_back(&(x[i]));
-        } else {
-          neg.push_back(&(x[i]));
-        }
-      }
-
-      std::unordered_set<int> available;
-      for (int atom = 1; atom <= x[0].size(); ++atom) {
-        available.insert(atom);
-      }
-
-      root = ID3(pos, neg, std::move(available));
-    }
-
-    ~Tree() {
-      delete root;
-    }
-
-    bool predict(const std::vector<int> &sample) {
-      Node* cur = root;
-      while (cur->atom != 0) {
-        int index = cur->atom - 1;
-        cur = cur->payload.child[sample[index]];
-      }
-      return cur->payload.label;
-    }
-
-    std::vector<std::vector<int> > getFormula(const bool &inCNF) {
-      std::vector<std::vector<int> > formula;
-      std::vector<int> branch_store;
-      root->getFormula(inCNF, formula, branch_store);
-      return formula;
-    }
-
-};
-
-int main() {
-  std::vector<std::vector<int> > x {
-    {0, 0, 0, 0},
-    {0, 0, 0, 1},
-    {0, 0, 1, 0},
-    {0, 0, 1, 1},
-    {0, 1, 0, 0},
-    {0, 1, 0, 1},
-    {0, 1, 1, 0},
-    {0, 1, 1, 1},
-    {1, 0, 0, 0},
-    {1, 0, 0, 1},
-    {1, 0, 1, 0},
-    {1, 0, 1, 1},
-    {1, 1, 0, 0},
-    {1, 1, 0, 1},
-    {1, 1, 1, 0},
-    {1, 1, 1, 1}
-  };
-  int y[] = {-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1};
-
-  Tree decision_tree(x, y);
-  std::vector<std::vector<int> > formula = decision_tree.getFormula(true);
-  std::string formula_str = "(";
-  for (int i = 0; i < formula.size(); ++i) {
-    for (int j = 0; j < formula[i].size(); ++j) {
-      formula_str += std::to_string(formula[i][j]) + (j != formula[i].size() - 1 ? " + " : "");
-    }
-    formula_str += (i != formula.size() - 1 ? ") * (" : ")");
+  std::unordered_set<int> available;
+  for (int atom = 1; atom <= x[0].size(); ++atom) {
+    available.insert(atom);
   }
-  LOG(INFO) << "ID3 CNF: " << formula_str;
 
-  formula = decision_tree.getFormula(false);
-  formula_str = "";
-  for (int i = 0; i < formula.size(); ++i) {
-    for (int j = 0; j < formula[i].size(); ++j) {
-      formula_str += std::to_string(formula[i][j]) + (j != formula[i].size() - 1 ? " * " : "");
-    }
-    formula_str += (i != formula.size() - 1 ? " + " : "");
-  }
-  LOG(INFO) << "ID3 DNF: " << formula_str;
+  root = ID3(pos, neg, std::move(available));
+}
 
-  for (const std::vector<int> &sample : x) {
-    LOG(INFO) << decision_tree.predict(sample);
+Tree::~Tree() {
+  delete root;
+}
+
+bool Tree::predict(const std::vector<int> &sample) {
+  Node* cur = root;
+  while (cur->atom != 0) {
+    int index = cur->atom - 1;
+    cur = cur->payload.child[sample[index]];
   }
+  return cur->payload.label;
+}
+
+std::vector<std::vector<int> > Tree::getFormula(const bool &inCNF) {
+  std::vector<std::vector<int> > formula;
+  std::vector<int> branch_store;
+  root->getFormula(inCNF, formula, branch_store);
+  return formula;
+}
 
   // TODO: RUN VALGRIND TO TEST FOR LEAKS
-  return EXIT_SUCCESS;
-}
+

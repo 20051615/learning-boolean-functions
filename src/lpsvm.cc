@@ -62,37 +62,3 @@ int predict(const std::vector<int> &to_predict, int m, int d, const std::vector<
   return (f >= 0.0) ? 1 : -1;
 }
 
-int main() {
-  std::vector<std::vector<int> > x {
-    {0, 0, 0},
-    {0, 0, 1},
-    {0, 1, 0},
-    {0, 1, 1},
-    {1, 0, 0},
-    {1, 0, 1},
-    {1, 1, 0},
-    {1, 1, 1}
-  };
-  int y[] = {-1, -1, -1, 1, -1, 1, -1, 1};
-  
-  int m = x.size();
-  int d = x[0].size();
-  double b = 0;
-  double a[m];
-  train(m, d, x, y, a, &b);
-  
-  std::vector<std::vector<int> > to_predicts {
-    {0, 0, 0},
-    {0, 0, 1},
-    {0, 1, 0},
-    {0, 1, 1},
-    {1, 0, 0},
-    {1, 0, 1},
-    {1, 1, 0},
-    {1, 1, 1}
-  };
-  for (int i = 0; i < to_predicts.size(); ++i) {
-    LOG(INFO) << "Prediction for " << i << ":" << predict(to_predicts[i], m, d, x, y, a, b);
-  }
-  return EXIT_SUCCESS;
-}
