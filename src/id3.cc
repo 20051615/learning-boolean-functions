@@ -226,6 +226,5 @@ int main() {
   }
 
   // TODO: RUN VALGRIND TO TEST FOR LEAKS
-  // TODO: EXTRACT DNF FROM TREE
   return EXIT_SUCCESS;
 }
