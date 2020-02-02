@@ -2,9 +2,6 @@
  * This describes the OCAT method, the version involving the full B&B search.
  */
 
-// For ortools-style logging and such
-#include "ortools/linear_solver/linear_solver.h"
-
 #include <vector>
 #include <string>
 #include <limits>

@@ -1,6 +1,3 @@
-// For ortools-style logging and such
-#include "ortools/linear_solver/linear_solver.h"
-
 #include <math.h>
 #include <vector>
 #include <unordered_set>
