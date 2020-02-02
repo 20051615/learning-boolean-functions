@@ -204,6 +204,7 @@ clean:
 	-$(DEL) $(EXE)
 	-$(DEL_REC) $(OBJ_DIR)
 	-$(DEL_REC) $(CLASS_DIR)
+	-$(DEL_REC) $(BIN_DIR)
 
 .PHONY: detect_port
 detect_port:
@@ -328,6 +329,9 @@ run: build
 endif # ifeq ($(SOURCE_SUFFIX),.cc)
 
 endif # ifndef CXX_BIN
+
+$(BIN_DIR):
+	-$(MKDIR) $(BIN_DIR)
 
 $(OBJ_DIR):
 	-$(MKDIR) $(OBJ_DIR)
