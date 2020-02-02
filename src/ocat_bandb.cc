@@ -12,6 +12,8 @@
 #define LIMIT_INIT 5
 #define LIMIT_MULTIPLIER 4
 
+namespace ocat {
+
 bool cmp(const std::vector<int> &a, const std::vector<int> &b) {
   return a.size() < b.size();
 }
@@ -161,3 +163,4 @@ std::vector<std::vector<int> > train(std::vector<std::vector<int> > &x, int y[])
   return result;
 }
 
+}

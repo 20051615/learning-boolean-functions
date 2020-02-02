@@ -33,21 +33,21 @@ int main() {
   int d = x[0].size();
   double b = 0;
   double a[m];
-  train(m, d, x, y, a, &b);
+  lpsvm::train(m, d, x, y, a, &b);
   
   for (int i = 0; i < x.size(); ++i) {
-    LOG(INFO) << predict(x[i], m, d, x, y, a, b);
+    LOG(INFO) << lpsvm::predict(x[i], m, d, x, y, a, b);
   }
 
   LOG(INFO) << "OCAT";
-  std::vector<std::vector<int> > formula = train(x, y);
+  std::vector<std::vector<int> > formula = ocat::train(x, y);
   LOG(INFO) << "OCAT CNF: " << to_string(true, formula);
   for (int i = 0; i < x.size(); ++i) {
     LOG(INFO) << eval(true, formula, x[i]);
   }
 
   LOG(INFO) << "ID3";
-  Tree decision_tree(x, y);
+  id3::Tree decision_tree(x, y);
   formula = decision_tree.getFormula(true);
   LOG(INFO) << "ID3 CNF: " << to_string(true, formula);
 

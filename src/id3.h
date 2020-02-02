@@ -1,6 +1,8 @@
 #include <vector>
 #include <unordered_set>
 
+namespace id3 {
+
 class Tree {
   struct Node {
     int atom; // 0 indicates a leaf node
@@ -41,3 +43,4 @@ class Tree {
 
 };
 
+}

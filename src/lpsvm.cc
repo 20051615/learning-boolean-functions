@@ -10,6 +10,8 @@
 
 namespace ortools = operations_research;
 
+namespace lpsvm {
+
 // d is the number of boolean variables for the problem concerned
 int kernel(const std::vector<int> &u, const std::vector<int> &v, int d) {
   int prod = 1;
@@ -62,3 +64,4 @@ int predict(const std::vector<int> &to_predict, int m, int d, const std::vector<
   return (f >= 0.0) ? 1 : -1;
 }
 
+}

@@ -9,6 +9,8 @@
 
 #include "id3.h"
 
+namespace id3 {
+
 double entropy(int a, int b) {
   double entropy = 0;
   double sum = a + b;
@@ -160,5 +162,6 @@ std::vector<std::vector<int> > Tree::getFormula(const bool &inCNF) {
   return formula;
 }
 
+}
   // TODO: RUN VALGRIND TO TEST FOR LEAKS
 
