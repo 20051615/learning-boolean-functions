@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <limits>
+#include <algorithm>
 
 #define LIMIT_INIT 5
 #define LIMIT_MULTIPLIER 4
