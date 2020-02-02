@@ -33,7 +33,7 @@ int main() {
   int d = x[0].size();
   double b = 0;
   double a[m];
-  lpsvm::train(m, d, x, y, a, &b);
+  lpsvm::train(m, d, x, y, a, b);
   
   for (int i = 0; i < x.size(); ++i) {
     LOG(INFO) << lpsvm::predict(x[i], m, d, x, y, a, b);

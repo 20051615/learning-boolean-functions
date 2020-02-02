@@ -22,7 +22,7 @@ int kernel(const std::vector<int> &u, const std::vector<int> &v, int d) {
 }
 
 // m is the size of the training set
-void train(int m, int d, const std::vector<std::vector<int> > &x, int y[], double a_store[], double* b_store) {
+void train(int m, int d, const std::vector<std::vector<int> > &x, int y[], double a_store[], double& b_store) {
   // Create the linear solver with the GLOP backend.
   ortools::MPSolver solver("simple_lp_program", ortools::MPSolver::GLOP_LINEAR_PROGRAMMING);
 
@@ -49,7 +49,7 @@ void train(int m, int d, const std::vector<std::vector<int> > &x, int y[], doubl
 
   solver.Solve();
 
-  *b_store = b->solution_value();
+  b_store = b->solution_value();
   for (int i = 0; i < m; ++i) {
     a_store[i] = a[i]->solution_value();
   }
