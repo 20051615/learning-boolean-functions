@@ -7,8 +7,8 @@
 #include <limits>
 #include <algorithm>
 
-#define LIMIT_INIT 5
-#define LIMIT_MULTIPLIER 4
+const int LIMIT_INIT = 5;
+const int LIMIT_MULTIPLIER = 4;
 
 namespace ocat {
 

@@ -3,10 +3,15 @@
 
 // TODO: i needs an integer type capable of storing 3^d
 
-#define epsilon 1.0e-6
+const double EPSILON = 1.0e-6;
+const double W_TRUNC_FACTOR = 0.2;
+
+#include "lpsvm.h"
 
 #include <vector>
 #include <tuple>
+#include <algorithm>
+#include <cmath>
 
 namespace lpsvm {
 
@@ -17,7 +22,7 @@ int pow_3(int d) {
 }
 
 bool is_small(double a) {
-  return abs(a) < epsilon;
+  return std::abs(a) < EPSILON;
 }
 
 int L(int x, int p) {
@@ -60,16 +65,43 @@ std::vector<std::tuple<int, double> > w(int m, int d, const std::vector<std::vec
   return result;
 }
 
-int w_predict(const std::vector<int> &to_predict, int m, int d, const std::vector<std::vector<int> > &x, int y[], double a[], double b) {
+bool w_comparator(const std::tuple<int, double> &i, const std::tuple<int, double> &j) {
+  return std::abs(std::get<1>(i)) > std::abs(std::get<1>(j));
+}
+
+std::vector<std::vector<int> > approx_formula(int m, int d, const std::vector<std::vector<int> > &x, int y[], double a[]) {
+  std::vector<std::vector<int> > result;
   std::vector<std::tuple<int, double> > weights = w(m, d, x, y, a);
-  double f = 0.0;
-  for (int i = 0; i < weights.size(); ++i) {
+  int post_trunc_size = weights.size() * W_TRUNC_FACTOR;
+  std::sort(weights.begin(), weights.end(), w_comparator);
+
+  int p[d];
+  for (int i = 0; i < post_trunc_size; ++i) {
     int k = std::get<0>(weights[i]);
+    idx_inverse(k, p, d);
     double weight = std::get<1>(weights[i]);
-    if (phi_i(to_predict, k, d)) f += weight;
+
+    if (weight > 0) {
+      std::vector<int> clause;
+      for (int q = 0; q < d; ++q) {
+        if (p[q] != 2) {
+          int index = (q + 1) * (2 * p[q] - 1);
+          clause.push_back(index);
+        }
+      }
+      result.push_back(std::move(clause));
+    } else {
+      for (int q = 0; q < d; ++q) {
+        if (p[q] != 2) {
+          std::vector<int> clause;
+          int index = (q + 1) * (1 - 2 * p[q]);
+          clause.push_back(index);
+          result.push_back(std::move(clause));
+        }
+      }
+    }
   }
-  f += b;
-  return(f >= 0.0) ? 1 : -1;
+  return result;
 }
 
 }
