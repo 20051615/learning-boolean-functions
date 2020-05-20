@@ -4,7 +4,7 @@
 // TODO: i needs an integer type capable of storing 3^d
 
 const double EPSILON = 1.0e-6;
-const double W_TRUNC_FACTOR = 0.2;
+const double W_TRUNC_FACTOR = 0.01;
 
 #include "lpsvm.h"
 
