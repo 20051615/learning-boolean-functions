@@ -7,26 +7,21 @@
 #include "id3.h"
 #include "ocat.h"
 
+// DEAL WITH THIS
+#include "svm_kernel.cc"
+
 int main() {
   std::vector<std::vector<int> > x {
-    {0, 0, 0, 0},
-    {0, 0, 0, 1},
-    {0, 0, 1, 0},
-    {0, 0, 1, 1},
-    {0, 1, 0, 0},
-    {0, 1, 0, 1},
-    {0, 1, 1, 0},
-    {0, 1, 1, 1},
-    {1, 0, 0, 0},
-    {1, 0, 0, 1},
-    {1, 0, 1, 0},
-    {1, 0, 1, 1},
-    {1, 1, 0, 0},
-    {1, 1, 0, 1},
-    {1, 1, 1, 0},
-    {1, 1, 1, 1}
+    {0, 0, 0},
+    {0, 0, 1},
+    {0, 1, 0},
+    {0, 1, 1},
+    {1, 0, 0},
+    {1, 0, 1},
+    {1, 1, 0},
+    {1, 1, 1},
   };
-  int y[] = {-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1};
+  int y[] = {1, -1, 1, -1, 1, 1, 1, 1};
   
   LOG(INFO) << "LPSVM";
   int m = x.size();
@@ -35,9 +30,27 @@ int main() {
   double a[m];
   lpsvm::train(m, d, x, y, a, b);
   
+  LOG(INFO) << "Predicting using kernel:";
   for (int i = 0; i < x.size(); ++i) {
     LOG(INFO) << lpsvm::predict(x[i], m, d, x, y, a, b);
   }
+
+  LOG(INFO) << "Predicting using weight vector:";
+  for (int i = 0; i < x.size(); ++i) {
+    LOG(INFO) << lpsvm::w_predict(x[i], m, d, x, y, a, b);
+  }
+
+  std::vector<std::tuple<int, double> > w = lpsvm::w(m, d, x, y, a);
+  LOG(INFO) << "Size of w: " << w.size();
+  for (int i = 0; i < w.size(); ++i) {
+    LOG(INFO) << "w[" << i << "]: " << std::get<0>(w[i]) << " " << std::get<1>(w[i]);
+  }
+
+  for (int i = 0; i < m; ++i) {
+    LOG(INFO) << "a[" << i << "]: " << a[i];
+  }
+
+  LOG(INFO) << "b: " << b;
 
   LOG(INFO) << "OCAT";
   std::vector<std::vector<int> > formula = ocat::train(x, y);
