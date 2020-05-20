@@ -10,60 +10,6 @@
 #include "ocat.h"
 #include "lpsvm.h"
 
-int pos_neg_digit(int n, int j) {
-  return 2 * ((n & (1 << j)) >> j) - 1;
-}
-
-void fill_y(int n, int y[]) {
-  for (int i = 15; i >= 0; --i) y[i] = pos_neg_digit(n, 15 - i);
-}
-
-int main() {
-  std::vector<std::vector<int> > x {
-    {0, 0, 0, 0},
-    {0, 0, 0, 1},
-    {0, 0, 1, 0},
-    {0, 0, 1, 1},
-    {0, 1, 0, 0},
-    {0, 1, 0, 1},
-    {0, 1, 1, 0},
-    {0, 1, 1, 1},
-    {1, 0, 0, 0},
-    {1, 0, 0, 1},
-    {1, 0, 1, 0},
-    {1, 0, 1, 1},
-    {1, 1, 0, 0},
-    {1, 1, 0, 1},
-    {1, 1, 1, 0},
-    {1, 1, 1, 1}
-  };
-
-  int m = x.size();
-  int d = 4;
-  double b = 0;
-  double a[m];
-  int y[16];
-  int approx_accuracy_average = 0;
-  int accuracy_average = 0;
-  for (int n = 0; n < 65536; ++n) {
-    fill_y(n, y);
-    
-    lpsvm::train(m, d, x, y, a, b);
-    std::vector<std::vector<int> > formula_approx = lpsvm::approx_formula(m, d, x, y, a);
-
-
-    for (int i = 0; i < 16; ++i) {
-      if (lpsvm::predict(x[i], m, d, x, y, a, b) == y[i]) accuracy_average += 1;
-      if (eval(false, formula_approx, x[i]) == (y[i] == 1)) approx_accuracy_average += 1;
-    }
-
-  }
-  LOG(INFO) << "accuracy_avg: " << accuracy_average / (double)(65536 * 16);
-  LOG(INFO) << "approx_accuracy_avg: " << approx_accuracy_average / (double)(65536 * 16);
-
-  return EXIT_SUCCESS;
-}
-/*
 int main() {
   std::vector<std::vector<int> > x {
     {0, 0, 0},
@@ -116,4 +62,3 @@ int main() {
 
   return EXIT_SUCCESS;
 }
-*/
