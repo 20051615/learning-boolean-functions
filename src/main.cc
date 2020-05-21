@@ -115,14 +115,14 @@ int main() {
     lpsvm_acc.push_back((double) correct_count / testing_x.size());
 
     correct_count = 0;
-    std::vector<std::vector<int> > formula = ocat::train(training_x, training_y);
+    std::vector<std::vector<int> > formula = ocat::train(true, training_x, training_y);
 
     for (int i = 0; i < testing_x.size(); ++i) {
-      if (eval(true, formula, testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
+      if (eval(false, formula, testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
     }
     ocat_acc.push_back((double) correct_count / testing_x.size());
 
-    LOG(INFO) << "OCAT CNF: " << to_string(true, formula);
+    LOG(INFO) << "OCAT DNF: " << to_string(false, formula);
 
     correct_count = 0;
     id3::Tree decision_tree(training_x, training_y);
