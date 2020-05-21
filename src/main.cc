@@ -23,6 +23,7 @@ const int NUM_FILES_PER_PREFIX = 19;
 
 const double ML_SPLIT = 0.8;
 const int NUM_FORMULAS_TO_TEST = 10;
+const int MAX_NUM_SAMPLES_TO_TRAIN_TEST = 100;
 
 int main() {
   std::string first_file_first_line;
@@ -75,6 +76,7 @@ int main() {
   }
 
   int num_samples = x.size();
+  num_samples = std::min(num_samples, MAX_NUM_SAMPLES_TO_TRAIN_TEST);
   std::vector<int> sample_indices;
   for (int i = 0; i < num_samples; ++i) {
     sample_indices.push_back(i);
