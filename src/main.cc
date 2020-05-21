@@ -18,11 +18,11 @@ auto rng = std::default_random_engine {};
 #include "lpsvm.h"
 #include "winnow.h"
 
-const std::string FILE_PREFIX = "data/pseudo_toth/3d_4formulas_";
-const int NUM_FILES_PER_PREFIX = 1;
+const std::string FILE_PREFIX = "data/toth/train_data_no_learning/small-dyn-partition-fixpoint-10_";
+const int NUM_FILES_PER_PREFIX = 19;
 
-const double ML_SPLIT = 1.0;
-const int NUM_FORMULAS_TO_TEST = 500;
+const double ML_SPLIT = 0.5;
+const int NUM_FORMULAS_TO_TEST = 30;
 
 int main() {
   std::string first_file_first_line;
@@ -98,6 +98,8 @@ int main() {
       testing_y.push_back(ys[sample_indices[i]][formula_i]);
     }
 
+    LOG(INFO) << "Index of formula about to be learned: " << formula_i;
+
     int correct_count = 0;
     int m = training_x.size();
     double b;
@@ -105,9 +107,7 @@ int main() {
 
     bool formula_solvable = lpsvm::train(m, d, training_x, training_y, a, b);
 
-    if (!formula_solvable) continue;
-
-    LOG(INFO) << "Index of formula solved: " << formula_i;
+    if (!formula_solvable) LOG(INFO) << "LPSVM failed to solve this formula. Note that lpsvm_acc for this one will be garbage.";
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (lpsvm::predict(testing_x[i], m, d, training_x, training_y, a, b) == testing_y[i]) ++correct_count;
