@@ -22,6 +22,7 @@ const std::string FILE_PREFIX = "data/toth/train_data_no_learning/query64_query4
 const int NUM_FILES_PER_PREFIX = 19;
 
 const double ML_SPLIT = 0.8;
+const int NUM_FORMULAS_TO_TEST = 50;
 
 int main() {
   std::string first_file_first_line;
@@ -80,9 +81,9 @@ int main() {
   }
   int training_size = num_samples * ML_SPLIT;
 
-  double lpsvm_acc[num_formula], ocat_acc[num_formula], id3_acc[num_formula], winnow_acc[num_formula];
+  std::vector<double> lpsvm_acc, ocat_acc, id3_acc, winnow_acc;
 
-  for (int formula_i = 0; formula_i < num_formula; ++formula_i) {
+  for (int formula_i = 0; formula_i < std::min(num_formula, NUM_FORMULAS_TO_TEST); ++formula_i) {
     std::shuffle(std::begin(sample_indices), std::end(sample_indices), rng);
     std::vector<std::vector<int> > training_x, testing_x;
     std::vector<int> training_y, testing_y;
@@ -106,12 +107,12 @@ int main() {
 
     if (!formula_solvable) continue;
 
-    LOG(INFO) << "formula_i: " << formula_i;
+    LOG(INFO) << "Index of formula solved: " << formula_i;
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (lpsvm::predict(testing_x[i], m, d, training_x, training_y, a, b) == testing_y[i]) ++correct_count;
     }
-    lpsvm_acc[formula_i] = (double) correct_count / testing_x.size();
+    lpsvm_acc.push_back((double) correct_count / testing_x.size());
 
     correct_count = 0;
     std::vector<std::vector<int> > formula = ocat::train(training_x, training_y);
@@ -119,7 +120,7 @@ int main() {
     for (int i = 0; i < testing_x.size(); ++i) {
       if (eval(true, formula, testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
     }
-    ocat_acc[formula_i] = (double) correct_count / testing_x.size();
+    ocat_acc.push_back((double) correct_count / testing_x.size());
 
     correct_count = 0;
     id3::Tree decision_tree(training_x, training_y);
@@ -127,7 +128,7 @@ int main() {
     for (int i = 0; i < testing_x.size(); ++i) {
       if (decision_tree.predict(testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
     }
-    id3_acc[formula_i] = (double) correct_count / testing_x.size();
+    id3_acc.push_back((double) correct_count / testing_x.size());
     
     correct_count = 0;
     double weight[d], thresh;
@@ -137,8 +138,12 @@ int main() {
     for (int i = 0; i < testing_x.size(); ++i) {
       if (winnow::predict(testing_x[i], weight, negated, thresh, d) == testing_y[i]) ++correct_count;
     }
-    winnow_acc[formula_i] = (double) correct_count / testing_x.size();
+    winnow_acc.push_back((double) correct_count / testing_x.size());
 
+  }
+
+  for (int i = 0; i < lpsvm_acc.size(); ++i) {
+    LOG(INFO) << "lpsvm: " << lpsvm_acc[i] << " ocat: " << ocat_acc[i] << " id3: " << id3_acc[i] << " winnow: " << winnow_acc[i];
   }
 
 
