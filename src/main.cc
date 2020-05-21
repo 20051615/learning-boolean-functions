@@ -21,8 +21,8 @@ auto rng = std::default_random_engine {};
 const std::string FILE_PREFIX = "data/toth/train_data_no_learning/small-dyn-partition-fixpoint-10_";
 const int NUM_FILES_PER_PREFIX = 19;
 
-const double ML_SPLIT = 0.5;
-const int NUM_FORMULAS_TO_TEST = 30;
+const double ML_SPLIT = 0.8;
+const int NUM_FORMULAS_TO_TEST = 10;
 
 int main() {
   std::string first_file_first_line;
@@ -82,6 +82,7 @@ int main() {
   int training_size = num_samples * ML_SPLIT;
 
   std::vector<double> lpsvm_acc, ocat_acc, id3_acc, winnow_acc;
+  int lpsvm_error_count = 0;
 
   for (int formula_i = 0; formula_i < std::min(num_formula, NUM_FORMULAS_TO_TEST); ++formula_i) {
     std::shuffle(std::begin(sample_indices), std::end(sample_indices), rng);
@@ -107,7 +108,10 @@ int main() {
 
     bool formula_solvable = lpsvm::train(m, d, training_x, training_y, a, b);
 
-    if (!formula_solvable) LOG(ERROR) << "LPSVM failed to solve this formula. Note that lpsvm_acc for this one will be garbage.";
+    if (!formula_solvable) {
+      LOG(ERROR) << "LPSVM failed to solve this formula. Note that lpsvm_acc for this one will be garbage.";
+      ++lpsvm_error_count;
+    }
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (lpsvm::predict(testing_x[i], m, d, training_x, training_y, a, b) == testing_y[i]) ++correct_count;
@@ -146,6 +150,8 @@ int main() {
 
   }
 
+  LOG(INFO) << "lpsvm failed " << lpsvm_error_count << " times. If this is non-zero, remember lpsvm_acc is garbage.";
+
   for (int i = 0; i < lpsvm_acc.size(); ++i) {
     LOG(INFO) << "lpsvm: " << lpsvm_acc[i] << " ocat: " << ocat_acc[i] << " id3: " << id3_acc[i] << " winnow: " << winnow_acc[i];
   }
@@ -168,7 +174,7 @@ int main() {
     {1, 1, 0},
     {1, 1, 1},
   };
-  std::vector<int> y {1, 1, -1, 1, 1, -1, 1, 1};
+  std::vector<int> y {1, 1, -1, 1, 1, 1, -1, 1};
 
   LOG(INFO) << "LPSVM";
   int m = x.size();
