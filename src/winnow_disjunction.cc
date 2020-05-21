@@ -4,28 +4,43 @@
 
 namespace winnow {
 
-void train(double weight[], const std::vector<std::vector<int> > &x, int y[], int d) {
-  for (int i = 0; i < d; ++i) weight[i] = 1;
+void train(double weight[], bool negated[], double &thresh, const std::vector<std::vector<int> > &x, int y[], int d) {
+  for (int i = 0; i < d; ++i) {
+    negated[i] = false;
+    weight[i] = 1;
+  }
+  thresh = (double) d / 2;
 
-  for (int i = 0; i < x.size(); ++i) {
-    int prediction = predict(x[i], weight, d);
+  int example_index = 0;
+  while (example_index < x.size() && y[example_index] == 1) ++example_index;
+  if (example_index == x.size()) {
+    thresh = -1;
+    return;
+  }
+
+  for (int i = 0; i < d; ++i) {
+    if (x[example_index][i] == 1) negated[i] = true;
+  }
+
+  for (example_index = 0; example_index < x.size(); ++example_index) {
+    int prediction = predict(x[example_index], weight, negated, thresh, d);
     
-    if (y[i] == -1 && prediction == 1) {
+    if (y[example_index] == -1 && prediction == 1) {
       for (int j = 0; j < d; ++j) {
-        if (x[i][j] == 1) weight[j] = 0;
+        if (x[example_index][j] == (negated[j] ? 0 : 1)) weight[j] = 0;
       }
-    } else if (y[i] == 1 && prediction == -1) {
+    } else if (y[example_index] == 1 && prediction == -1) {
       for (int j = 0; j < d; ++j) {
-        if (x[i][j] == 1) weight[j] *= 2;
+        if (x[example_index][j] == (negated[j] ? 0 : 1)) weight[j] *= 2;
       }
     }
   }
 }
 
-int predict(const std::vector<int> &to_predict, double weight[], int d) {
-  double sum = 0, thresh = (double) d / 2;
+int predict(const std::vector<int> &to_predict, double weight[], bool negated[], double &thresh, int d) {
+  double sum = 0;
   for (int i = 0; i < d; ++i) {
-    sum += weight[i] * to_predict[i];
+    sum += weight[i] * (negated[i] ? 1 - to_predict[i] : to_predict[i]);
   }
   if (sum > thresh) return 1;
   else return -1;

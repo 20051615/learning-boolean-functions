@@ -22,7 +22,7 @@ int main() {
     {1, 1, 0},
     {1, 1, 1},
   };
-  int y[] = {-1, -1, 1, 1, -1, -1, 1, 1};
+  int y[] = {1, 1, 1, 1, -1, -1, 1, 1};
 
   LOG(INFO) << "LPSVM";
   int m = x.size();
@@ -44,9 +44,11 @@ int main() {
 
   LOG(INFO) << "WINNOW";
   double weight[d];
-  winnow::train(weight, x, y, d);
+  double thresh;
+  bool negated[d];
+  winnow::train(weight, negated, thresh, x, y, d);
   for (int i = 0; i < x.size(); ++i) {
-    LOG(INFO) << winnow::predict(x[i], weight, d);
+    LOG(INFO) << winnow::predict(x[i], weight, negated, thresh, d);
   }
 
   LOG(INFO) << "OCAT";
