@@ -146,8 +146,8 @@ std::vector<std::vector<int> > train(const bool &DNFmode, std::vector<std::vecto
 
   std::vector<std::vector<int> > result;
 
-  if (neg.size() == 0) return result;
-  if (pos.size() == 0) {
+  if ((neg.size() == 0 && !DNFmode) || (pos.size() == 0 && DNFmode)) return result;
+  if ((pos.size() == 0 && !DNFmode) || (neg.size() == 0 && DNFmode)) {
     std::vector<int> empty_stub;
     result.push_back(empty_stub);
     return result;
@@ -166,6 +166,15 @@ std::vector<std::vector<int> > train(const bool &DNFmode, std::vector<std::vecto
     result.push_back(clause);
     clause.clear();
   }
+
+  if (DNFmode) {
+    for (int i = 0; i < result.size(); ++i) {
+      for (int j = 0; j < result[i].size(); ++j) {
+        result[i][j] = -result[i][j];
+      }
+    }
+  }
+
   return result;
 }
 
