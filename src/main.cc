@@ -168,7 +168,7 @@ int main() {
     {1, 1, 0},
     {1, 1, 1},
   };
-  std::vector<int> y {-1, -1, 1, 1, -1, -1, 1, 1};
+  std::vector<int> y {1, 1, -1, 1, 1, -1, 1, 1};
 
   LOG(INFO) << "LPSVM";
   int m = x.size();
@@ -198,7 +198,7 @@ int main() {
   }
 
   LOG(INFO) << "OCAT";
-  std::vector<std::vector<int> > formula = ocat::train(x, y);
+  std::vector<std::vector<int> > formula = ocat::train(false, x, y);
   LOG(INFO) << "OCAT CNF: " << to_string(true, formula);
   for (int i = 0; i < x.size(); ++i) {
     LOG(INFO) << eval(true, formula, x[i]);
