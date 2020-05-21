@@ -13,8 +13,8 @@ namespace ortools = operations_research;
 namespace lpsvm {
 
 // d is the number of boolean variables for the problem concerned
-int kernel(const std::vector<int> &u, const std::vector<int> &v, int d) {
-  int prod = 1;
+double kernel(const std::vector<int> &u, const std::vector<int> &v, int d) {
+  double prod = 1;
   for (int i = 0; i < d; ++i) {
     prod *= (2 * u[i] * v[i] - u[i] - v[i] + 2);
   }
