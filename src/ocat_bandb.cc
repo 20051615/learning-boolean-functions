@@ -17,7 +17,7 @@ bool cmp(const std::vector<int> &a, const std::vector<int> &b) {
 }
 
 // if an item is rejected, its size is returned; otherwise, a very large value is
-int push_capped(std::vector<std::vector<int> > &store, int limit, const std::vector<int> &item) {
+int push_capped(std::vector<std::vector<int> > &store, double limit, const std::vector<int> &item) {
   if (store.size() < limit) {
     store.push_back(item);
     std::push_heap(store.begin(), store.end(), cmp);
@@ -39,7 +39,7 @@ int push_capped(std::vector<std::vector<int> > &store, int limit, const std::vec
  * If optimality can be proven for the clause proposed in clause_store, 0 is returned.
  * Otherwise, a new best_known (size of the set in the terminal state) is returned.
  */
-int propose_clause(const std::vector<std::vector<int> *> &pos, std::vector<std::vector<int> *> &neg, int limit, int best_known, std::vector<int> &clause_store) {
+int propose_clause(const std::vector<std::vector<int> *> &pos, std::vector<std::vector<int> *> &neg, double limit, int best_known, std::vector<int> &clause_store) {
   int d = pos[0]->size();
   std::vector<int> empty_1d;
 
@@ -156,7 +156,7 @@ std::vector<std::vector<int> > train(const bool &DNFmode, std::vector<std::vecto
   std::vector<int> clause;
   while (!neg.empty()) {
     int best_known = std::numeric_limits<int>::max();
-    int limit = LIMIT_INIT;
+    double limit = LIMIT_INIT;
 
     while (best_known != 0) {
       best_known = propose_clause(pos, neg, limit, best_known, clause);
