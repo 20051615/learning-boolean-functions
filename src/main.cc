@@ -22,7 +22,7 @@ const std::string FILE_PREFIX = "data/toth/train_data_no_learning/small-dyn-part
 const int NUM_FILES_PER_PREFIX = 19;
 
 const double ML_SPLIT = 0.2;
-const int NUM_FORMULAS_TO_TEST = 100;
+const int NUM_FORMULAS_TO_TEST = 10;
 const int MAX_NUM_SAMPLES_TO_TRAIN_TEST = 5000;
 
 int main() {
