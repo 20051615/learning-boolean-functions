@@ -9,6 +9,7 @@
 #include "id3.h"
 #include "ocat.h"
 #include "lpsvm.h"
+#include "winnow.h"
 
 int main() {
   std::vector<std::vector<int> > x {
@@ -22,7 +23,7 @@ int main() {
     {1, 1, 1},
   };
   int y[] = {-1, -1, 1, 1, -1, -1, 1, 1};
-  
+
   LOG(INFO) << "LPSVM";
   int m = x.size();
   int d = x[0].size();
@@ -39,6 +40,13 @@ int main() {
 
   for (int i = 0; i < x.size(); ++i) {
     LOG(INFO) << eval(false, approx_formula, x[i]);
+  }
+
+  LOG(INFO) << "WINNOW";
+  double weight[d];
+  winnow::train(weight, x, y, d);
+  for (int i = 0; i < x.size(); ++i) {
+    LOG(INFO) << winnow::predict(x[i], weight, d);
   }
 
   LOG(INFO) << "OCAT";
