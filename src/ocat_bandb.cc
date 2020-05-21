@@ -134,10 +134,10 @@ int propose_clause(const std::vector<std::vector<int> *> &pos, std::vector<std::
 }
 
 // input sanitization: code won't work if there are no negative examples. But of course.
-std::vector<std::vector<int> > train(std::vector<std::vector<int> > &x, const std::vector<int> &y) {
+std::vector<std::vector<int> > train(const bool &DNFmode, std::vector<std::vector<int> > &x, const std::vector<int> &y) {
   std::vector<std::vector<int> *> pos, neg;
   for (int i = 0; i < x.size(); ++i) {
-    if (y[i] > 0) {
+    if ((y[i] > 0 && !DNFmode) || (y[i] <= 0 && DNFmode)) {
       pos.push_back(&(x[i]));
     } else {
       neg.push_back(&(x[i]));
