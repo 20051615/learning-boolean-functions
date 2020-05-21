@@ -18,11 +18,11 @@ auto rng = std::default_random_engine {};
 #include "lpsvm.h"
 #include "winnow.h"
 
-const std::string FILE_PREFIX = "data/toth/train_data_no_learning/query64_query42_1344n_";
-const int NUM_FILES_PER_PREFIX = 19;
+const std::string FILE_PREFIX = "data/pseudo_toth/3d_4formulas_";
+const int NUM_FILES_PER_PREFIX = 1;
 
-const double ML_SPLIT = 0.8;
-const int NUM_FORMULAS_TO_TEST = 50;
+const double ML_SPLIT = 1.0;
+const int NUM_FORMULAS_TO_TEST = 500;
 
 int main() {
   std::string first_file_first_line;
@@ -122,6 +122,8 @@ int main() {
     }
     ocat_acc.push_back((double) correct_count / testing_x.size());
 
+    LOG(INFO) << "OCAT CNF: " << to_string(true, formula);
+
     correct_count = 0;
     id3::Tree decision_tree(training_x, training_y);
 
@@ -129,6 +131,8 @@ int main() {
       if (decision_tree.predict(testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
     }
     id3_acc.push_back((double) correct_count / testing_x.size());
+
+    LOG(INFO) << "id3 DNF: " << to_string(false, decision_tree.getFormula(false));
     
     correct_count = 0;
     double weight[d], thresh;
