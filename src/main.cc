@@ -21,9 +21,9 @@ auto rng = std::default_random_engine {};
 const std::string FILE_PREFIX = "data/toth/train_data_no_learning/small-dyn-partition-fixpoint-10_";
 const int NUM_FILES_PER_PREFIX = 19;
 
-const double ML_SPLIT = 0.8;
-const int NUM_FORMULAS_TO_TEST = 10;
-const int MAX_NUM_SAMPLES_TO_TRAIN_TEST = 100;
+const double ML_SPLIT = 0.2;
+const int NUM_FORMULAS_TO_TEST = 100;
+const int MAX_NUM_SAMPLES_TO_TRAIN_TEST = 5000;
 
 int main() {
   std::string first_file_first_line;
