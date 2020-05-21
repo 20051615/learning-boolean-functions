@@ -9,3 +9,4 @@ share/
 LICENSE-2.0.txt
 #Makefile
 README.md
+.vscode/

@@ -63,13 +63,12 @@ int main() {
         }
         ys.push_back(std::move(output_indicators));
       }
-      // CHECK IF I AM AT END OF FILE
-      // CHECK I HAVE HIT END OF FILE
 
     }
 
     file.close();
   }
+
   return EXIT_SUCCESS;
 }
 
