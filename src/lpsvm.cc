@@ -49,7 +49,7 @@ bool train(int m, int d, const std::vector<std::vector<int> > &x, const std::vec
   objective->SetMinimization();
 
   ortools::MPSolver::ResultStatus linear_program_result = solver.Solve();
-  if (linear_program_result != ortools::MPSolver::ResultStatus::OPTIMAL) return false;
+  if (linear_program_result != ortools::MPSolver::ResultStatus::OPTIMAL && linear_program_result != ortools::MPSolver::ResultStatus::FEASIBLE) return false;
 
   b_store = b->solution_value();
   for (int i = 0; i < m; ++i) {
