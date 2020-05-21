@@ -51,7 +51,7 @@ int phi_i(const std::vector<int> &x, int i, int d) {
   return 1;
 }
 
-std::vector<std::tuple<int, double> > w(int m, int d, const std::vector<std::vector<int> > &x, int y[], double a[]) {
+std::vector<std::tuple<int, double> > w(int m, int d, const std::vector<std::vector<int> > &x, const std::vector<int> &y, double a[]) {
   std::vector<std::tuple<int, double>> result;
   for (int k = 1; k < pow_3(d); ++k) {
     double weight = 0;
@@ -69,7 +69,7 @@ bool w_comparator(const std::tuple<int, double> &i, const std::tuple<int, double
   return std::abs(std::get<1>(i)) > std::abs(std::get<1>(j));
 }
 
-std::vector<std::vector<int> > approx_formula(int m, int d, const std::vector<std::vector<int> > &x, int y[], double a[]) {
+std::vector<std::vector<int> > approx_formula(int m, int d, const std::vector<std::vector<int> > &x, const std::vector<int> &y, double a[]) {
   std::vector<std::vector<int> > result;
   std::vector<std::tuple<int, double> > weights = w(m, d, x, y, a);
   int post_trunc_size = weights.size() * W_TRUNC_FACTOR;

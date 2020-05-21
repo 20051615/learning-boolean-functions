@@ -32,7 +32,7 @@ bool CNF_eval(const std::vector<std::vector<int> > &formula, const std::vector<i
 }
 
 // input sanitization: code won't work if there are no negative examples. But of course.
-std::vector<std::vector<int> > train(int d, const std::vector<std::vector<int> > &x, int y[]) {
+std::vector<std::vector<int> > train(int d, const std::vector<std::vector<int> > &x, const std::vector<int> &y) {
   std::vector<std::vector<int> > pos, neg;
   for (int i = 0; i < x.size(); ++i) {
     if (y[i] > 0) {
@@ -145,7 +145,7 @@ int main() {
     {1, 1, 0},
     {1, 1, 1}
   };
-  int y[] = {-1, -1, 1, -1, -1, 1, -1, -1};
+  std::vector<int> y {-1, -1, 1, -1, -1, 1, -1, -1};
 
   std::vector<std::vector<int> > formula = train(x[0].size(), x, y);
   std::string formula_str = "(";

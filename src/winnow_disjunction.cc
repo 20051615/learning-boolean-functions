@@ -4,7 +4,7 @@
 
 namespace winnow {
 
-void train(double weight[], bool negated[], double &thresh, const std::vector<std::vector<int> > &x, int y[], int d) {
+void train(double weight[], bool negated[], double &thresh, const std::vector<std::vector<int> > &x, const std::vector<int> &y, int d) {
   for (int i = 0; i < d; ++i) {
     negated[i] = false;
     weight[i] = 1;

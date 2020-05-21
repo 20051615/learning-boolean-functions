@@ -33,7 +33,7 @@ class Tree {
   static Node* ID3(const std::vector<std::vector<int> *> &pos, const std::vector<std::vector<int> *> &neg, std::unordered_set<int> available);
 
   public:
-    Tree(std::vector<std::vector<int> > &x, int y[]);
+    Tree(std::vector<std::vector<int> > &x, const std::vector<int> &y);
 
     ~Tree();
 

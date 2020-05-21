@@ -121,7 +121,7 @@ Tree::Node* Tree::ID3(const std::vector<std::vector<int> *> &pos, const std::vec
   return result;
 }
 
-Tree::Tree(std::vector<std::vector<int> > &x, int y[]) {
+Tree::Tree(std::vector<std::vector<int> > &x, const std::vector<int> &y) {
   std::vector<std::vector<int> *> pos, neg;
   for (int i = 0; i < x.size(); ++i) {
     if (y[i] > 0) {
