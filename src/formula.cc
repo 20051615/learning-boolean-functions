@@ -40,6 +40,9 @@ bool DNF_eval(const std::vector<std::vector<int> > &formula, const std::vector<i
 // TODO: test DNF_eval. Or eval(false..)
 
 bool eval(const bool &asCNF, const std::vector<std::vector<int> > &formula, const std::vector<int> &input) {
+  if (formula.size() == 0) return true;
+  if (formula.size() == 1 && formula[0].size() == 0) return false;
+
   if (asCNF)
     return CNF_eval(formula, input);
   else

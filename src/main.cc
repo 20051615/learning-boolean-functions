@@ -6,6 +6,10 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
+#include <random>
+
+auto rng = std::default_random_engine {};
 
 #include "lpsvm.h"
 #include "formula.h"
@@ -16,6 +20,8 @@
 
 const std::string FILE_PREFIX = "data/toth/train_data_no_learning/query64_query42_1344n_";
 const int NUM_FILES_PER_PREFIX = 19;
+
+const double ML_SPLIT = 0.8;
 
 int main() {
   std::string first_file_first_line;
@@ -63,11 +69,78 @@ int main() {
         }
         ys.push_back(std::move(output_indicators));
       }
-
     }
-
     file.close();
   }
+
+  int num_samples = x.size();
+  std::vector<int> sample_indices;
+  for (int i = 0; i < num_samples; ++i) {
+    sample_indices.push_back(i);
+  }
+  int training_size = num_samples * ML_SPLIT;
+
+  double lpsvm_acc[num_formula], ocat_acc[num_formula], id3_acc[num_formula], winnow_acc[num_formula];
+
+  for (int formula_i = 0; formula_i < num_formula; ++formula_i) {
+    std::shuffle(std::begin(sample_indices), std::end(sample_indices), rng);
+    std::vector<std::vector<int> > training_x, testing_x;
+    std::vector<int> training_y, testing_y;
+
+    for (int i = 0; i < training_size; ++i) {
+      training_x.push_back(x[sample_indices[i]]);
+      training_y.push_back(ys[sample_indices[i]][formula_i]);
+    }
+
+    for (int i = training_size; i < num_samples; ++i) {
+      testing_x.push_back(x[sample_indices[i]]);
+      testing_y.push_back(ys[sample_indices[i]][formula_i]);
+    }
+
+    int correct_count = 0;
+    int m = training_x.size();
+    double b;
+    double a[m];
+
+    bool formula_solvable = lpsvm::train(m, d, training_x, training_y, a, b);
+
+    if (!formula_solvable) continue;
+
+    LOG(INFO) << "formula_i: " << formula_i;
+
+    for (int i = 0; i < testing_x.size(); ++i) {
+      if (lpsvm::predict(testing_x[i], m, d, training_x, training_y, a, b) == testing_y[i]) ++correct_count;
+    }
+    lpsvm_acc[formula_i] = (double) correct_count / testing_x.size();
+
+    correct_count = 0;
+    std::vector<std::vector<int> > formula = ocat::train(training_x, training_y);
+
+    for (int i = 0; i < testing_x.size(); ++i) {
+      if (eval(true, formula, testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
+    }
+    ocat_acc[formula_i] = (double) correct_count / testing_x.size();
+
+    correct_count = 0;
+    id3::Tree decision_tree(training_x, training_y);
+
+    for (int i = 0; i < testing_x.size(); ++i) {
+      if (decision_tree.predict(testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
+    }
+    id3_acc[formula_i] = (double) correct_count / testing_x.size();
+    
+    correct_count = 0;
+    double weight[d], thresh;
+    bool negated[d];
+    winnow::train(weight, negated, thresh, training_x, training_y, d);
+
+    for (int i = 0; i < testing_x.size(); ++i) {
+      if (winnow::predict(testing_x[i], weight, negated, thresh, d) == testing_y[i]) ++correct_count;
+    }
+    winnow_acc[formula_i] = (double) correct_count / testing_x.size();
+
+  }
+
 
   return EXIT_SUCCESS;
 }
@@ -86,7 +159,7 @@ int main() {
     {1, 1, 0},
     {1, 1, 1},
   };
-  std::vector<int> y {1, 1, 1, 1, -1, -1, 1, 1};
+  std::vector<int> y {-1, -1, 1, 1, -1, -1, 1, 1};
 
   LOG(INFO) << "LPSVM";
   int m = x.size();

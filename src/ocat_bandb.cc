@@ -145,6 +145,14 @@ std::vector<std::vector<int> > train(std::vector<std::vector<int> > &x, const st
   }
 
   std::vector<std::vector<int> > result;
+
+  if (neg.size() == 0) return result;
+  if (pos.size() == 0) {
+    std::vector<int> empty_stub;
+    result.push_back(empty_stub);
+    return result;
+  }
+
   std::vector<int> clause;
   while (!neg.empty()) {
     int best_known = std::numeric_limits<int>::max();
