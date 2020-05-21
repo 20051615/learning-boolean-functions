@@ -116,6 +116,8 @@ int main() {
     if (!formula_solvable) {
       LOG(ERROR) << "LPSVM failed to solve this formula. Note that lpsvm_acc for this one will be garbage.";
       ++lpsvm_error_count;
+    } else {
+      LOG(INFO) << "LPSVM done.";
     }
 
     for (int i = 0; i < testing_x.size(); ++i) {
@@ -125,6 +127,7 @@ int main() {
 
     correct_count = 0;
     std::vector<std::vector<int> > formula = ocat::train(false, training_x, training_y);
+    LOG(INFO) << "OCAT done.";
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (eval(true, formula, testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
@@ -135,18 +138,20 @@ int main() {
 
     correct_count = 0;
     id3::Tree decision_tree(training_x, training_y);
+    LOG(INFO) << "ID3 done.";
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (decision_tree.predict(testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
     }
     id3_acc.push_back((double) correct_count / testing_x.size());
 
-    LOG(INFO) << "id3 DNF: " << to_string(false, decision_tree.getFormula(false));
+    LOG(INFO) << "ID3 DNF: " << to_string(false, decision_tree.getFormula(false));
     
     correct_count = 0;
     double weight[d], thresh;
     bool negated[d];
     winnow::train(weight, negated, thresh, training_x, training_y, d);
+    LOG(INFO) << "WINNOW done.";
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (winnow::predict(testing_x[i], weight, negated, thresh, d) == testing_y[i]) ++correct_count;
