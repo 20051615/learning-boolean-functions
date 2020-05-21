@@ -86,6 +86,9 @@ int main() {
   std::vector<double> lpsvm_acc, ocat_acc, id3_acc, winnow_acc;
   int lpsvm_error_count = 0;
 
+  LOG(INFO) << "# training samples: " << training_size;
+  LOG(INFO) << "# testing samples: " << num_samples - training_size;
+
   for (int formula_i = 0; formula_i < std::min(num_formula, NUM_FORMULAS_TO_TEST); ++formula_i) {
     std::shuffle(std::begin(sample_indices), std::end(sample_indices), rng);
     std::vector<std::vector<int> > training_x, testing_x;
