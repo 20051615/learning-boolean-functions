@@ -1,0 +1,10 @@
+4d: lpsvm against winnow:
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0522 20:50:11.421118  5884 main.cc:291] accuracy_avg: 1
+I0522 20:50:11.421252  5884 main.cc:292] approx_accuracy_avg: 0.525349
+
+
+3d: lpsvm against winnow:
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0522 20:53:35.145839  6107 main.cc:283] accuracy_avg: 1
+I0522 20:53:35.145963  6107 main.cc:284] approx_accuracy_avg: 0.665039
