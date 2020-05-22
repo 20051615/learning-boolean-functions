@@ -21,8 +21,8 @@ auto rng = std::default_random_engine {};
 const std::string FILE_PREFIX = "data/toth/train_data_no_learning/small-dyn-partition-fixpoint-10_";
 const int NUM_FILES_PER_PREFIX = 19;
 
-const double ML_SPLIT = 0.2;
-const int NUM_FORMULAS_TO_TEST = 10;
+const double ML_SPLIT = 0.05;
+const int NUM_FORMULAS_TO_TEST = 150;
 const int MAX_NUM_SAMPLES_TO_TRAIN_TEST = 5000;
 
 int main() {
@@ -104,7 +104,7 @@ int main() {
       testing_y.push_back(ys[sample_indices[i]][formula_i]);
     }
 
-    LOG(INFO) << "Index of formula about to be learned: " << formula_i;
+//    LOG(INFO) << "Index of formula about to be learned: " << formula_i;
 
     int correct_count = 0;
     int m = training_x.size();
@@ -117,7 +117,7 @@ int main() {
       LOG(ERROR) << "LPSVM failed to solve this formula. Note that lpsvm_acc for this one will be garbage.";
       ++lpsvm_error_count;
     } else {
-      LOG(INFO) << "LPSVM done.";
+//      LOG(INFO) << "LPSVM done.";
     }
 
     for (int i = 0; i < testing_x.size(); ++i) {
@@ -125,33 +125,33 @@ int main() {
     }
     lpsvm_acc.push_back((double) correct_count / testing_x.size());
 
-    correct_count = 0;
-    std::vector<std::vector<int> > formula = ocat::train(false, training_x, training_y);
-    LOG(INFO) << "OCAT done.";
+//    correct_count = 0;
+//    std::vector<std::vector<int> > formula = ocat::train(false, training_x, training_y);
+//    LOG(INFO) << "OCAT done.";
 
-    for (int i = 0; i < testing_x.size(); ++i) {
-      if (eval(true, formula, testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
-    }
-    ocat_acc.push_back((double) correct_count / testing_x.size());
+//    for (int i = 0; i < testing_x.size(); ++i) {
+//      if (eval(true, formula, testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
+//    }
+//    ocat_acc.push_back((double) correct_count / testing_x.size());
 
-    LOG(INFO) << "OCAT CNF: " << to_string(true, formula);
+//    LOG(INFO) << "OCAT CNF: " << to_string(true, formula);
 
     correct_count = 0;
     id3::Tree decision_tree(training_x, training_y);
-    LOG(INFO) << "ID3 done.";
+//    LOG(INFO) << "ID3 done.";
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (decision_tree.predict(testing_x[i]) == (testing_y[i] == 1)) ++correct_count;
     }
     id3_acc.push_back((double) correct_count / testing_x.size());
 
-    LOG(INFO) << "ID3 DNF: " << to_string(false, decision_tree.getFormula(false));
+//    LOG(INFO) << "ID3 DNF: " << to_string(false, decision_tree.getFormula(false));
     
     correct_count = 0;
     double weight[d], thresh;
     bool negated[d];
     winnow::train(weight, negated, thresh, training_x, training_y, d);
-    LOG(INFO) << "WINNOW done.";
+//    LOG(INFO) << "WINNOW done.";
 
     for (int i = 0; i < testing_x.size(); ++i) {
       if (winnow::predict(testing_x[i], weight, negated, thresh, d) == testing_y[i]) ++correct_count;
@@ -162,9 +162,19 @@ int main() {
 
   LOG(INFO) << "lpsvm failed " << lpsvm_error_count << " times. If this is non-zero, remember lpsvm_acc is garbage.";
 
+  double lpsvm_acc_sum = 0, id3_acc_sum = 0, winnow_acc_sum = 0; 
   for (int i = 0; i < lpsvm_acc.size(); ++i) {
-    LOG(INFO) << "lpsvm: " << lpsvm_acc[i] << " ocat: " << ocat_acc[i] << " id3: " << id3_acc[i] << " winnow: " << winnow_acc[i];
+//    LOG(INFO) << "lpsvm: " << lpsvm_acc[i] << " ocat: " << ocat_acc[i] << " id3: " << id3_acc[i] << " winnow: " << winnow_acc[i];
+    LOG(INFO) << "lpsvm: " << lpsvm_acc[i] << " id3: " << id3_acc[i] << " winnow: " << winnow_acc[i];
+    lpsvm_acc_sum += lpsvm_acc[i];
+    id3_acc_sum += id3_acc[i];
+    winnow_acc_sum += winnow_acc[i];
   }
+
+  lpsvm_acc_sum /= lpsvm_acc.size();
+  id3_acc_sum /= lpsvm_acc.size();
+  winnow_acc_sum /= lpsvm_acc.size();
+  LOG(INFO) << "averages across " << lpsvm_acc.size() << " formula: " << "lpsvm: " << lpsvm_acc_sum << " id3: " << id3_acc_sum << " winnow: " << winnow_acc_sum;
 
 
   return EXIT_SUCCESS;
